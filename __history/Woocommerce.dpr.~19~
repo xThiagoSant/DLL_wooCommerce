@@ -221,19 +221,14 @@ var jSON, cat:string;
   I: Integer;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    CreateRest;
-    Ligacoes(Url, rmPOST);
-    RESTRequest.Resource := '/products';
-    Assinatura(CK, CS);
+      CreateRest;
+      Ligacoes(Url, rmPOST);
+      RESTRequest.Resource := '/products';
+      Assinatura(CK, CS);
 
-    if not Assigned(categories) then
-    begin
-
-    end
-    else
-    begin
       if categories.Count = 0 then
         cat := '{}'
       else if categories.Count = 1 then
@@ -281,6 +276,8 @@ begin
         Result := TJson.Format(RESTResponse.JSONValue)
       else
         Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('Erro Tentar Postar o Produto - ' + chr(13)+E.Message);
     end;
   finally
     FreeRest;

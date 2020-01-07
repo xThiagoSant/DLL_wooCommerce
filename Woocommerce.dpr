@@ -237,11 +237,13 @@ begin
       end
       else if categories.Count > 1 then
       begin
-        for I := 0 to categories.Count do
+        for I := 0 to categories.Count - 1 do
           cat := cat + '{"id": ' + categories[I] + '},';
 
         Delete(cat,length(cat),1);
       end;
+
+      Result := cat;
 
       jSON :=
           '{'+
