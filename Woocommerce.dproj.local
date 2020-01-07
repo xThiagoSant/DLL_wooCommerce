@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019/07/23 14:51:58.000.086,=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2019/08/13 20:43:17.000.540,=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\ServerMethodsUnit1.pas</Transaction>
+    <Transaction>2019/08/13 20:43:21.000.400,=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\WebModuleUnit1.pas</Transaction>
+    <Transaction>2019/10/25 05:46:13.000.803,=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2019/12/07 11:54:14.000.853,=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2020/01/02 10:27:36.000.007,C:\Desenvolvimento\DLL_wooCommerce\WooCommerceDll.dproj=C:\Users\Thiago\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2020/01/06 15:19:25.756,C:\Trabalho\wsLap\delphiLap\DLL_wooCommerce\Woocommerce.dproj=C:\Trabalho\wsLap\delphiLap\DLL_wooCommerce\WooCommerceDll.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
