@@ -66,36 +66,40 @@ end;
 function GetCategoria(Url, CK, CS, ID:string):WideString;stdcall;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmGET);
+
+      if Trim(ID) <> EmptyStr then
+        RESTRequest.Resource := '/products/categories'+'/'+ID
+      else
+        RESTRequest.Resource := '/products/categories';
+
+      Assinatura(CK, CS);
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Recuperar a Categoria - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmGET);
-
-    if Trim(ID) <> EmptyStr then
-      RESTRequest.Resource := '/products/categories'+'/'+ID
-    else
-      RESTRequest.Resource := '/products/categories';
-
-    Assinatura(CK, CS);
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -105,48 +109,52 @@ function PostCategoria(Url, CK, CS, name, slug, parent, description:string):wide
 var sParent, jSON:string;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmPOST);
+      RESTRequest.Resource := '/products/categories';
+
+      Assinatura(CK, CS);
+
+      if Trim(parent) <> EmptyStr then
+        sParent := parent
+      else
+        sParent := '0';
+
+      jSON :=
+          '{'+
+            '"name": "' + name +'",'+
+            '"slug": "' + slug +'",'+
+            '"parent": "' + sParent + '", '+
+            '"description": "' + description + '" '+
+          '}';
+
+      RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
+
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Salvar a Categoria - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmPOST);
-    RESTRequest.Resource := '/products/categories';
-
-    Assinatura(CK, CS);
-
-    if Trim(parent) <> EmptyStr then
-      sParent := parent
-    else
-      sParent := '0';
-
-    jSON :=
-        '{'+
-          '"name": "' + name +'",'+
-          '"slug": "' + slug +'",'+
-          '"parent": "' + sParent + '", '+
-          '"description": "' + description + '" '+
-        '}';
-
-    RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
-
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -156,45 +164,49 @@ function PutCategoria(Url, CK, CS, ID, name, slug, parent, description:string):w
 var jSON:string;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      if Trim(ID) = EmptyStr then
+      begin
+        Result := '{"Informe um ID para Editar uma categoria."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmPATCH);
+      RESTRequest.Resource := '/products/categories'+'/'+ID;
+      Assinatura(CK, CS);
+
+      jSON :=
+          '{'+
+            '"name": "' + name + '",'+
+            '"slug": "' + slug + '"'+
+          '}';
+      RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
+
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Alterar a Categoria - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    if Trim(ID) = EmptyStr then
-    begin
-      Result := '{"Informe um ID para Editar uma categoria."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmPATCH);
-    RESTRequest.Resource := '/products/categories'+'/'+ID;
-    Assinatura(CK, CS);
-
-    jSON :=
-        '{'+
-          '"name": "' + name + '",'+
-          '"slug": "' + slug + '"'+
-        '}';
-    RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
-
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -204,37 +216,41 @@ function DelCategoria(Url, CK, CS, ID:string):wideString; stdcall;
 var jSON:string;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      if Trim(ID) = EmptyStr then
+      begin
+        Result := '{"Informe um ID para Deletar uma categoria."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmDELETE);
+      RESTRequest.Resource := '/products/categories'+'/'+ID;
+      Assinatura(CK, CS);
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Apagar a Categoria - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    if Trim(ID) = EmptyStr then
-    begin
-      Result := '{"Informe um ID para Deletar uma categoria."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmDELETE);
-    RESTRequest.Resource := '/products/categories'+'/'+ID;
-    Assinatura(CK, CS);
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -243,36 +259,40 @@ end;
 function GetProduto(Url, CK, CS, ID:string):WideString;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmGET);
+
+      if Trim(ID) <> EmptyStr then
+        RESTRequest.Resource := '/products'+'/'+ID
+      else
+        RESTRequest.Resource := '/products';
+
+      Assinatura(CK, CS);
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Apagar a Categoria - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmGET);
-
-    if Trim(ID) <> EmptyStr then
-      RESTRequest.Resource := '/products'+'/'+ID
-    else
-      RESTRequest.Resource := '/products';
-
-    Assinatura(CK, CS);
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -355,7 +375,7 @@ begin
       else
         Result := RESTResponse.Content;
     except on E: Exception do
-      Result := ('{Erro Tentar Postar o Produto - ' + E.Message + '}');
+      Result := ('{Erro Tentar Incluir o Produto - ' + E.Message + '}');
     end;
   finally
     FreeRest;
@@ -370,78 +390,82 @@ var jSON, cat:string;
   I: Integer;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      if Trim(ID) = EmptyStr then
+      begin
+        Result := '{"Informe um ID para Alterar um produto."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmPATCH);
+      RESTRequest.Resource := '/products'+'/'+ID;
+      Assinatura(CK, CS);
+
+      if categories.Count = 0 then
+        cat := '{}'
+      else if categories.Count = 1 then
+      begin
+        cat := '{"id": ' + categories[0] + '}';
+      end
+      else if categories.Count > 1 then
+      begin
+        for I := 0 to categories.Count - 1 do
+          cat := cat + '{"id": ' + categories[I] + '},';
+
+        Delete(cat,length(cat),1);
+      end;
+
+      jSON :=
+          '{'+
+            '"name": "' + name + '",'+
+            '"slug": "' + slug +'",'+
+            '"type": "simple",'+
+            '"description": "'+ description +'",'+
+            '"short_description": "'+ short_description +'",'+
+            '"sku": "'+ sku +'",'+
+            '"price": "'+ price +'",'+
+            '"regular_price": "'+ regular_price +'",'+
+            '"sale_price": "'+ sale_price +'",'+
+            '"dimensions":'+
+                '{'+
+                  '"length": "' + _length + '",'+
+                  '"width": "' + _width + '",'+
+                  '"height": "' + _height + '"'+
+                '},'
+                  +
+            '"categories":'+
+                '['+
+                     cat+
+                ']'+
+          '}';
+
+      RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
+
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Alterar o Produto - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    if Trim(ID) = EmptyStr then
-    begin
-      Result := '{"Informe um ID para Alterar um produto."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmPATCH);
-    RESTRequest.Resource := '/products'+'/'+ID;
-    Assinatura(CK, CS);
-
-    if categories.Count = 0 then
-      cat := '{}'
-    else if categories.Count = 1 then
-    begin
-      cat := '{"id": ' + categories[0] + '}';
-    end
-    else if categories.Count > 1 then
-    begin
-      for I := 0 to categories.Count - 1 do
-        cat := cat + '{"id": ' + categories[I] + '},';
-
-      Delete(cat,length(cat),1);
-    end;
-
-    jSON :=
-        '{'+
-          '"name": "' + name + '",'+
-          '"slug": "' + slug +'",'+
-          '"type": "simple",'+
-          '"description": "'+ description +'",'+
-          '"short_description": "'+ short_description +'",'+
-          '"sku": "'+ sku +'",'+
-          '"price": "'+ price +'",'+
-          '"regular_price": "'+ regular_price +'",'+
-          '"sale_price": "'+ sale_price +'",'+
-          '"dimensions":'+
-              '{'+
-                '"length": "' + _length + '",'+
-                '"width": "' + _width + '",'+
-                '"height": "' + _height + '"'+
-              '},'
-                +
-          '"categories":'+
-              '['+
-                   cat+
-              ']'+
-        '}';
-
-    RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
-
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -451,42 +475,45 @@ function DelProduto(Url, CK, CS, ID:string):wideString; stdcall;
 var jSON:string;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    //Validações
-    if Trim(Url) = EmptyStr then
-    begin
-      Result := '{"Informe uma URL Válida."}';
-      Exit;
+      //Validações
+      if Trim(Url) = EmptyStr then
+      begin
+        Result := '{"Informe uma URL Válida."}';
+        Exit;
+      end;
+
+      if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+      begin
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
+        Exit;
+      end;
+
+      if Trim(ID) = EmptyStr then
+      begin
+        Result := '{"Informe um ID para Deletar um produto."}';
+        Exit;
+      end;
+
+      CreateRest;
+      Ligacoes(Url, rmDELETE);
+      RESTRequest.Resource := '/products'+'/'+ID;
+      Assinatura(CK, CS);
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('{Erro ao Tentar Apagar o Produto - ' + E.Message + '}');
     end;
-
-    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
-    begin
-      Result := '{"Não foi informado as chaves de acesso ao WS."}';
-      Exit;
-    end;
-
-    if Trim(ID) = EmptyStr then
-    begin
-      Result := '{"Informe um ID para Deletar um produto."}';
-      Exit;
-    end;
-
-    CreateRest;
-    Ligacoes(Url, rmDELETE);
-    RESTRequest.Resource := '/products'+'/'+ID;
-    Assinatura(CK, CS);
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
 end;
-
 
 exports
 
