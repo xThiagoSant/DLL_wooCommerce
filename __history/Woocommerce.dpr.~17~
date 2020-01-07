@@ -15,6 +15,7 @@ uses
   System.SysUtils,
   System.Classes,
   REST.Types, REST.Client,
+  Generics.Collections,
   Data.Bind.Components, Data.Bind.ObjectScope, REST.Authenticator.OAuth,
   REST.Response.Adapter, Rest.Json, REST.Authenticator.Basic;
 
@@ -214,66 +215,70 @@ end;
 
 function PostProduto(Url, CK, CS, name, slug, description,
 short_description, sku, price, regular_price, sale_price,
-_length, _width, _height:string; categories: TStringList):wideString;
+_length, _width, _height:string; categories: TList<string>):wideString;
 
 var jSON, cat:string;
   I: Integer;
 begin
   try
-    Result := '';
+    try
+      Result := '';
 
-    CreateRest;
-    Ligacoes(Url, rmPOST);
-    RESTRequest.Resource := '/products';
-    Assinatura(CK, CS);
+      CreateRest;
+      Ligacoes(Url, rmPOST);
+      RESTRequest.Resource := '/products';
+      Assinatura(CK, CS);
 
-    if categories.Count = 0 then
-      cat := '{}'
-    else if categories.Count = 1 then
-    begin
-      cat := '{"id": ' + categories[0] + '}';
-    end
-    else if categories.Count > 1 then
-    begin
-      for I := 0 to categories.Count do
-        cat := cat + '{"id": ' + categories[I] + '},';
+      if categories.Count = 0 then
+        cat := '{}'
+      else if categories.Count = 1 then
+      begin
+        cat := '{"id": ' + categories[0] + '}';
+      end
+      else if categories.Count > 1 then
+      begin
+        for I := 0 to categories.Count do
+          cat := cat + '{"id": ' + categories[I] + '},';
 
-      Delete(cat,length(cat),1);
+        Delete(cat,length(cat),1);
+      end;
+
+      jSON :=
+          '{'+
+            '"name": "' + name + '",'+
+            '"slug": "' + slug +'",'+
+            '"type": "simple",'+
+            '"description": "'+ description +'",'+
+            '"short_description": "'+ short_description +'",'+
+            '"sku": "'+ sku +'",'+
+            '"price": "'+ price +'",'+
+            '"regular_price": "'+ regular_price +'",'+
+            '"sale_price": "'+ sale_price +'",'+
+            '"dimensions":'+
+                '{'+
+                  '"length": "' + _length + '",'+
+                  '"width": "' + _width + '",'+
+                  '"height": "' + _height + '"'+
+                '},'
+                +
+            '"categories":'+
+                '['+
+                     cat
+                   +
+                ']'+
+          '}';
+
+      RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
+
+      RESTRequest.Execute;
+
+      if assigned(RESTResponse.JSONValue) then
+        Result := TJson.Format(RESTResponse.JSONValue)
+      else
+        Result := RESTResponse.Content;
+    except on E: Exception do
+      Result := ('Erro Tentar Postar o Produto - ' + chr(13)+E.Message);
     end;
-
-    jSON :=
-        '{'+
-          '"name": "' + name + '",'+
-          '"slug": "' + slug +'",'+
-          '"type": "simple",'+
-          '"description": "'+ description +'",'+
-          '"short_description": "'+ short_description +'",'+
-          '"sku": "'+ sku +'",'+
-          '"price": "'+ price +'",'+
-          '"regular_price": "'+ regular_price +'",'+
-          '"sale_price": "'+ regular_price +'",'+
-          '"dimensions":'+
-              '{'+
-                '"length": "' + _length + '",'+
-                '"width": "' + _width + '",'+
-                '"height": "' + _height + '"'+
-              '},'
-              +
-          '"categories":'+
-              '['+
-                   cat
-                 +
-              ']'+
-        '}';
-
-    RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
-
-    RESTRequest.Execute;
-
-    if assigned(RESTResponse.JSONValue) then
-      Result := TJson.Format(RESTResponse.JSONValue)
-    else
-      Result := RESTResponse.Content;
   finally
     FreeRest;
   end;
@@ -284,7 +289,7 @@ short_description, sku, price, regular_price, sale_price,
 _length, _width, _height, ID:string):wideString;
 
 var jSON:string;
-  I, len: Integer;
+  I: Integer;
 begin
   try
     Result := '';
