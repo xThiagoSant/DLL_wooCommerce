@@ -1,17 +1,6 @@
 library Woocommerce;
 
-{ Important note about DLL memory management: ShareMem must be the
-  first unit in your library's USES clause AND your project's (select
-  Project-View Source) USES clause if your DLL exports any procedures or
-  functions that pass strings as parameters or function results. This
-  applies to all strings passed to and from your DLL--even those that
-  are nested in records and classes. ShareMem is the interface unit to
-  the BORLNDMM.DLL shared memory manager, which must be deployed along
-  with your DLL. To avoid using BORLNDMM.DLL, pass string information
-  using PChar or ShortString parameters. }
-
 uses
-  //ShareMem,
   System.SysUtils,
   System.Classes,
   REST.Types, REST.Client,
@@ -79,6 +68,19 @@ begin
   try
     Result := '';
 
+    //Validações
+    if Trim(Url) = EmptyStr then
+    begin
+      Result := '{"Informe uma URL Válida."}';
+      Exit;
+    end;
+
+    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+    begin
+      Result := '{"Não foi informado as chaves de acesso ao WS."}';
+      Exit;
+    end;
+
     CreateRest;
     Ligacoes(Url, rmGET);
 
@@ -104,6 +106,19 @@ var sParent, jSON:string;
 begin
   try
     Result := '';
+
+    //Validações
+    if Trim(Url) = EmptyStr then
+    begin
+      Result := '{"Informe uma URL Válida."}';
+      Exit;
+    end;
+
+    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+    begin
+      Result := '{"Não foi informado as chaves de acesso ao WS."}';
+      Exit;
+    end;
 
     CreateRest;
     Ligacoes(Url, rmPOST);
@@ -142,6 +157,19 @@ var jSON:string;
 begin
   try
     Result := '';
+
+    //Validações
+    if Trim(Url) = EmptyStr then
+    begin
+      Result := '{"Informe uma URL Válida."}';
+      Exit;
+    end;
+
+    if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
+    begin
+      Result := '{"Não foi informado as chaves de acesso ao WS."}';
+      Exit;
+    end;
 
     CreateRest;
     Ligacoes(Url, rmPATCH);
@@ -237,7 +265,7 @@ begin
       end
       else if categories.Count > 1 then
       begin
-        for I := 0 to categories.Count do
+        for I := 0 to categories.Count - 1 do
           cat := cat + '{"id": ' + categories[I] + '},';
 
         Delete(cat,length(cat),1);
@@ -263,8 +291,7 @@ begin
                 +
             '"categories":'+
                 '['+
-                     cat
-                   +
+                     cat+
                 ']'+
           '}';
 
@@ -286,9 +313,9 @@ end;
 
 function PutProduto(Url, CK, CS, name, slug, description,
 short_description, sku, price, regular_price, sale_price,
-_length, _width, _height, ID:string):wideString;
+_length, _width, _height, ID:string; categories: TList<string>):wideString;
 
-var jSON:string;
+var jSON, cat:string;
   I: Integer;
 begin
   try
@@ -298,6 +325,20 @@ begin
     Ligacoes(Url, rmPATCH);
     RESTRequest.Resource := '/products'+'/'+ID;
     Assinatura(CK, CS);
+
+    if categories.Count = 0 then
+      cat := '{}'
+    else if categories.Count = 1 then
+    begin
+      cat := '{"id": ' + categories[0] + '}';
+    end
+    else if categories.Count > 1 then
+    begin
+      for I := 0 to categories.Count - 1 do
+        cat := cat + '{"id": ' + categories[I] + '},';
+
+      Delete(cat,length(cat),1);
+    end;
 
     jSON :=
         '{'+
@@ -315,7 +356,12 @@ begin
                 '"length": "' + _length + '",'+
                 '"width": "' + _width + '",'+
                 '"height": "' + _height + '"'+
-              '}'+
+              '},'
+                +
+          '"categories":'+
+              '['+
+                   cat+
+              ']'+
         '}';
 
     RESTRequest.AddBody(jSON, ContentTypeFromString('application/json'));
