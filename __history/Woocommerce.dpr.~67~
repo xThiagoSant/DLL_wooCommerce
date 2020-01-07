@@ -313,13 +313,13 @@ begin
       //Validações
       if Trim(Url) = EmptyStr then
       begin
-        Result := '{"Erro":"Informe uma URL Válida."}';
+        Result := '{"Informe uma URL Válida."}';
         Exit;
       end;
 
       if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
       begin
-        Result := '{"Erro":"Não foi informado as chaves de acesso ao WS."}';
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
         Exit;
       end;
 
@@ -375,7 +375,7 @@ begin
       else
         Result := RESTResponse.Content;
     except on E: Exception do
-      Result := ('{"Erro":"Erro Tentar Incluir o Produto - ' + E.Message + '"}');
+      Result := ('{Erro Tentar Incluir o Produto - ' + E.Message + '}');
     end;
   finally
     FreeRest;
@@ -396,19 +396,19 @@ begin
       //Validações
       if Trim(Url) = EmptyStr then
       begin
-        Result := '{"Erro":"Informe uma URL Válida."}';
+        Result := '{"Informe uma URL Válida."}';
         Exit;
       end;
 
       if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
       begin
-        Result := '{"Erro":"Não foi informado as chaves de acesso ao WS."}';
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
         Exit;
       end;
 
       if Trim(ID) = EmptyStr then
       begin
-        Result := '{"Erro":"Informe um ID para Alterar um produto."}';
+        Result := '{"Informe um ID para Alterar um produto."}';
         Exit;
       end;
 
@@ -464,7 +464,7 @@ begin
       else
         Result := RESTResponse.Content;
     except on E: Exception do
-      Result := ('{"Erro":"Erro ao Tentar Alterar o Produto - ' + E.Message + '"}');
+      Result := ('{Erro ao Tentar Alterar o Produto - ' + E.Message + '}');
     end;
   finally
     FreeRest;
@@ -481,19 +481,19 @@ begin
       //Validações
       if Trim(Url) = EmptyStr then
       begin
-        Result := '{"Erro":"Informe uma URL Válida."}';
+        Result := '{"Informe uma URL Válida."}';
         Exit;
       end;
 
       if (Trim(CK) = EmptyStr) or (Trim(CS) = EmptyStr) then
       begin
-        Result := '{"Erro":"Não foi informado as chaves de acesso ao WS."}';
+        Result := '{"Não foi informado as chaves de acesso ao WS."}';
         Exit;
       end;
 
       if Trim(ID) = EmptyStr then
       begin
-        Result := '{"Erro":"Informe um ID para Deletar um produto."}';
+        Result := '{"Informe um ID para Deletar um produto."}';
         Exit;
       end;
 
@@ -508,7 +508,7 @@ begin
       else
         Result := RESTResponse.Content;
     except on E: Exception do
-      Result := ('{"Erro":"Erro ao Tentar Apagar o Produto - ' + E.Message + '"}');
+      Result := ('{Erro ao Tentar Apagar o Produto - ' + E.Message + '}');
     end;
   finally
     FreeRest;
